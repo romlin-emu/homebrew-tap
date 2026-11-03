@@ -28,6 +28,7 @@ jobs:
           mkdir -p "$(dirname "$tap_dir")"
           test ! -e "$tap_dir"
           ln -s "$GITHUB_WORKSPACE" "$tap_dir"
+          brew trust romlin-emu/tap
       - name: Check cask style
         run: brew style --cask romlin-emu/tap/romlin
       - name: Audit cask

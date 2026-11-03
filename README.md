@@ -18,6 +18,7 @@ On macOS with Homebrew installed, register this checkout as `romlin-emu/tap` so 
 tap_dir="$(brew --repository)/Library/Taps/romlin-emu/homebrew-tap"
 mkdir -p "$(dirname "$tap_dir")"
 ln -s "$PWD" "$tap_dir"
+brew trust romlin-emu/tap
 ```
 
 If the tap already exists, use its checkout or run `brew untap romlin-emu/tap` before registering this one. Confirm `brew --repository romlin-emu/tap` resolves to this checkout, then run:
