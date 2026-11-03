@@ -10,4 +10,39 @@ brew install --cask romlin-emu/tap/romlin
 
 Update it with `brew upgrade --cask romlin`.
 
-To enable the cask, set `version` to a published tag without its `v` prefix, replace `sha256 :no_check` with the SHA-256 of `Romlin-<version>-macos-arm64.zip` from that [Romlin release](https://github.com/romlin-emu/romlin/releases), confirm the archive contains `Romlin.app`, and remove `disable!`. Do not reuse a RomP archive checksum.
+## Maintainer checks
+
+On macOS with Homebrew installed, register this checkout as `romlin-emu/tap` so checks use your local edits. From the repository root, if that tap is not already registered:
+
+```sh
+tap_dir="$(brew --repository)/Library/Taps/romlin-emu/homebrew-tap"
+mkdir -p "$(dirname "$tap_dir")"
+ln -s "$PWD" "$tap_dir"
+```
+
+If the tap already exists, use its checkout or run `brew untap romlin-emu/tap` before registering this one. Confirm `brew --repository romlin-emu/tap` resolves to this checkout, then run:
+
+```sh
+brew style --cask romlin-emu/tap/romlin
+brew audit --cask romlin-emu/tap/romlin
+```
+
+CI runs these checks on macOS for pushes and pull requests, with the checked-out revision registered as the tap. These checks do not verify installation or download the application. Keep the cask disabled while only nightly builds exist; do not use `--online` or install the unpublished version.
+
+## Updating a verified release
+
+Once a stable [Romlin release](https://github.com/romlin-emu/romlin/releases) is published, download its versioned macOS ARM64 ZIP and matching `.sha512` file into an empty directory. Substitute the published version for `X.Y.Z`:
+
+```sh
+version=X.Y.Z
+archive="Romlin-${version}-macos-arm64.zip"
+release_url="https://github.com/romlin-emu/romlin/releases/download/v${version}"
+curl --fail --location --output "$archive" "$release_url/$archive"
+curl --fail --location --output "$archive.sha512" "$release_url/$archive.sha512"
+shasum -a 512 -c "$archive.sha512"
+unzip -t "$archive"
+unzip -l "$archive"
+shasum -a 256 "$archive"
+```
+
+Proceed only if the published SHA-512 matches, the ZIP passes its integrity check, and its listing contains `Romlin.app` at the archive root. In `Casks/romlin.rb`, set `version` without the tag's `v` prefix, replace `sha256 :no_check` with the calculated SHA-256, confirm the interpolated URL names that exact archive, and remove `disable!`. Do not reuse a RomP archive checksum. Run the maintainer checks above, then verify `brew install --cask romlin-emu/tap/romlin` on an Apple Silicon Mac after publication and enabling the cask.
